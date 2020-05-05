@@ -42,6 +42,7 @@ class SteamScraper(commands.Cog):
     async def post_steam_sale(self):
         pass
 
+
 def setup(client):
     client.add_cog(client)
 
