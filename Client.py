@@ -74,11 +74,15 @@ async def reload_folder(ctx, folder):
         except Exception as e:
             await ctx.send(e)
 
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        try:
-            client.load_extension(f'cogs.{filename[:-3]}')
-        except Exception as e:
-            print(e)
+with open('./DiscordSettings/CogLoad.txt', 'r') as f:
+    for line in f:
+        folder = line.strip('\n')
+        for filename in os.listdir(f'./{folder}'):
+            if filename.endswith('.py'):
+                try:
+                    client.load_extension(f'{folder}.{filename[:-3]}')
+                except Exception as e:
+                    print(e)
 
-client.run('NjkwNDA3MTcyNTE2ODcyMjEy.XnWUsg.6POu4FgqUjupvOjm93s--ae1xa8')
+with open('token.txt', 'r') as token:
+    client.run(token.read())
