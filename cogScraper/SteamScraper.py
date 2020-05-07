@@ -1,8 +1,6 @@
-import discord
 from discord.ext import commands, tasks
 from bs4 import BeautifulSoup as soup
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 import os
 import json
@@ -14,10 +12,12 @@ class SteamScraper(commands.Cog):
         self.chrome_options = Options()
         self.chrome_options.add_argument('--headless')
         self.url = 'https://www.whenisthenextsteamsale.com/'
+        self.info = None
 
-
-
-    def get_time_left(self):
+    @commands.command()
+    async def get_time_left(self, ctx):
+        # Uses selenium and beautiful soup to open a headless browser, scraping
+        # the javascript off of the steam sale countdown page
         driver = webdriver.Chrome(chrome_options=self.chrome_options)
         driver.get(self.url)
 
@@ -36,9 +36,7 @@ class SteamScraper(commands.Cog):
 
         info = [details_large, main_timer, sub_timer, next_sale, sale_date, confirmation]
         driver.quit()
-        return info
-
-
+        self.info = info
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -58,20 +56,15 @@ class SteamScraper(commands.Cog):
 
     @commands.command()
     async def check_sale(self, ctx):
-        print('hello')
-        try:
-            info = await self.get_time_left()
-            await ctx.send(
+        mes = await ctx.send('Loading')
+        await self.get_time_left.invoke(ctx)
+        await mes.edit(content=
                 f'''
-                            Upcoming Steam Sale:\n
-                            {info[3]}\n
-                            {info[4]} {info[5]}\n
-                            {info[0]}\n
-                            {info[1]}\n
-                            {info[2]}\n
-                            ''')
-        except Exception as e:
-            print(e)
+                Upcoming Steam Sale: {self.info[3]}\n\n{self.info[4]} ({self.info[5]})\n{self.info[0]}\n{self.info[1]}
+                ''')
+
+
+
 
     # @tasks.loop(hours=12)
     # async def post_steam_sale(self):
